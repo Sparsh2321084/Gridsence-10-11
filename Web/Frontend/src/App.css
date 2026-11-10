@@ -3,6 +3,16 @@
   margin-inline: auto;
 }
 
+.site-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.site-layout-content {
+  flex: 1;
+}
+
 :root {
   --blue: #1163eb;
   --blue-deep: #0c4fc4;
@@ -603,7 +613,7 @@ body {
 }
 
 .dashboard-page {
-  min-height: 100vh;
+  min-height: 76vh;
   background: linear-gradient(180deg, #f7fbff 0%, #eef6ff 100%);
 }
 
