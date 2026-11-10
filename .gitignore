@@ -1,0 +1,15 @@
+# project files
+ML/Data/
+ML/Data/**
+
+# node / frontend build artifacts
+Web/Frontend/node_modules/
+Web/Frontend/dist/
+Web/Frontend/.vite/
+
+# general
+*.log
+.env
+.DS_Store
+__pycache__/
+.venv/
