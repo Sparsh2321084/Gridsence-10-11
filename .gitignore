@@ -1,6 +1,7 @@
 # project files
 ML/Data/
 ML/Data/**
+Pictures/
 
 # node / frontend build artifacts
 Web/Frontend/node_modules/
