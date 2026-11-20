@@ -216,12 +216,7 @@ class LiveWeatherTests(unittest.TestCase):
         x_future = build_baseline_future_exog(future, dataset, EXOG_COLUMNS)
 
         self.assertEqual(x_future.shape, (96, 29))
-        pd.testing.assert_index_equal(
-            x_future.index,
-            future,
-            check_names=False,
-            check_freq=False,
-        )
+        self.assertEqual(x_future.index.tolist(), future.tolist())
         self.assertEqual(int(x_future.iloc[0]["block_of_day"]), 15)
         self.assertFalse(x_future.isna().any().any())
 
