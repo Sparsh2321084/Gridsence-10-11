@@ -2,11 +2,14 @@
 **/.venv/
 **/node_modules/
 **/dist/
+**/.env
+**/.env.*
 .git/
 Web/Backend/data/
 ML/Data/Data/
 ML/Data/Extracted/
-ML/Data/Dataset/
+ML/Data/Dataset/*
+!ML/Data/Dataset/delhi_ml_dataset_2019_2026.parquet
 ML/Data/Reports/
 ML/Data/Processing/weather_cache/
 ML/Data/Processing/yearly_cleaned/
