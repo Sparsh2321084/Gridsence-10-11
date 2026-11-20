@@ -3,6 +3,9 @@ ML/Data/*
 !ML/Data/Processing/
 ML/Data/Processing/*
 !ML/Data/Processing/*.py
+!ML/Data/Dataset/
+ML/Data/Dataset/*
+!ML/Data/Dataset/delhi_ml_dataset_2019_2026.parquet
 Pictures/
 
 # node / frontend build artifacts
@@ -14,6 +17,7 @@ Web/Frontend/.env.*
 Web/Backend/data/
 Web/Backend/.env
 ML/Model/*.joblib
+!ML/Model/gridsence_production_bundle.joblib
 
 # general
 *.log

@@ -103,10 +103,10 @@ is suitable only for a demo: services spin down after 15 minutes without
 traffic, and their local files are lost on spin-down, restart, or redeploy.
 Free web services cannot attach persistent disks.
 
-The Docker image intentionally does not include the model or enriched dataset,
-and Git ignores both artifacts. Until they are made available through an
-approved build-time or external download source, `/api/ready` will return
-`503`. The current local SQLite actuals database is about 336 MiB and is not
+The Docker image includes the model bundle and enriched dataset from this
+repository so `/api/ready` can find them. This repository is public, so those
+two artifacts are publicly downloadable. Do not place private data in either
+file. The current local SQLite actuals database is about 336 MiB and is not
 included in the image; any SQLite database created by a Free service is
 ephemeral and cannot preserve actuals or predictions across restarts. The
 backend currently uses SQLite, so a separate persistent database would also
@@ -119,8 +119,8 @@ service or storage should be created without explicit cost approval.
 
 ## Data and operating limitations
 
-- The model and dataset are required local artifacts and are not downloaded by
-  the API.
+- The model and dataset must be present at their configured paths; the API
+  does not download them at runtime.
 - SLDC values are monitoring data, not ABT settlement data. ABT workbooks can
   be placed in the configured inbox for backfill.
 - Stale actuals, weather-provider failures, or missing history can prevent

@@ -10,6 +10,8 @@ COPY Web/Backend/requirements.txt /app/Web/Backend/requirements.txt
 RUN python -m pip install --no-cache-dir -r Web/Backend/requirements.txt
 
 COPY Web/Backend /app/Web/Backend
+COPY ML/Model/gridsence_production_bundle.joblib /app/ML/Model/gridsence_production_bundle.joblib
+COPY ML/Data/Dataset/delhi_ml_dataset_2019_2026.parquet /app/ML/Data/Dataset/delhi_ml_dataset_2019_2026.parquet
 COPY ML/Model/predict_delhi_load.py /app/ML/Model/predict_delhi_load.py
 COPY ML/Data/Processing/enrich_delhi_dataset.py /app/ML/Data/Processing/enrich_delhi_dataset.py
 COPY ML/Data/Processing/paths.py /app/ML/Data/Processing/paths.py
