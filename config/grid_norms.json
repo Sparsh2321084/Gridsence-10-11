@@ -1,0 +1,63 @@
+{
+  "config_version": 1,
+  "ramp_thresholds_mw": {
+    "metric": "absolute 15-minute change",
+    "quantile_method": "linear",
+    "source_dataset": "ML/Data/Dataset/delhi_ml_dataset_2019_2026.parquet",
+    "source_start": "2019-04-01T00:00:00",
+    "source_end": "2026-09-27T23:45:00",
+    "source_rows": 262752,
+    "valid_15_minute_pairs": 260741,
+    "entity_thresholds": {
+      "brpl_mw": {
+        "p75": 32.3120000000004,
+        "p95": 58.4652928000003
+      },
+      "tpddl_mw": {
+        "p75": 24.3,
+        "p95": 50.9952031564692
+      },
+      "bypl_mw": {
+        "p75": 16.77884,
+        "p95": 30.4945168000001
+      },
+      "ndmc_mw": {
+        "p75": 3.16400000000002,
+        "p95": 8.79200000000009
+      },
+      "mes_mw": {
+        "p75": 0.648000000000007,
+        "p95": 1.492
+      },
+      "railways_mw": {
+        "p75": 3.2496,
+        "p95": 5.855
+      },
+      "delhi_total_mw": {
+        "p75": 73.1822999999995,
+        "p95": 136.389159999998
+      }
+    }
+  },
+  "thermal_coal_burn": {
+    "specific_consumption_tonnes_per_mwh": 0.65,
+    "default_thermal_mix_share": 0.68,
+    "seasonal_thermal_mix": {
+      "months": [8, 9, 10],
+      "share": 0.8
+    },
+    "station_heat_rate_kcal_per_kwh": {
+      "minimum": 2375,
+      "maximum": 2500
+    },
+    "coal_gcv_kcal_per_kg": {
+      "minimum": 3800,
+      "maximum": 4200
+    },
+    "basis_note": "Planning estimate using user-specified normative assumptions; not plant-specific fuel accounting."
+  },
+  "reserve_policy": {
+    "minimum_p50_fraction": 0.05,
+    "basis_note": "Forecast-derived planning calculation; not an operator dispatch instruction."
+  }
+}

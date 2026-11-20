@@ -1,9 +1,9 @@
-import { DashboardPlaceholderSection } from './sections/DashboardPlaceholderSection'
+import { DashboardForecastSection } from './sections/DashboardForecastSection'
 
 export function DashboardPage() {
   return (
     <div className="dashboard-page">
-      <DashboardPlaceholderSection />
+      <DashboardForecastSection />
     </div>
   )
 }

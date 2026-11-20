@@ -1,0 +1,30 @@
+services:
+  api:
+    build:
+      context: ../..
+      dockerfile: Web/Backend/Dockerfile
+    env_file:
+      - .env
+    environment:
+      GRIDSENSE_PROJECT_ROOT: /app
+      GRIDSENSE_MODEL_PATH: /artifacts/model/gridsence_production_bundle.joblib
+      GRIDSENSE_DATASET_PATH: /artifacts/dataset/delhi_ml_dataset_2019_2026.parquet
+      GRIDSENSE_ACTUALS_DB_PATH: /data/actual_load_15m.sqlite3
+      GRIDSENSE_ABT_INBOX_PATH: /data/abt_inbox
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../../ML/Model:/artifacts/model:ro
+      - ../../ML/Data/Dataset:/artifacts/dataset:ro
+      - ./data:/data
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/ready', timeout=3)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped

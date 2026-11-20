@@ -1,0 +1,64 @@
+{
+  "config_version": 1,
+  "corridor_limits_mw": {
+    "delhi_total_mw": 8600,
+    "brpl_mw": 3650,
+    "tpddl_mw": 2550,
+    "bypl_mw": 1900,
+    "ndmc_mw": 420,
+    "mes_mw": 65,
+    "railways_mw": 45
+  },
+  "thermal_derating": {
+    "base_temperature_c": 40,
+    "derating_fraction_per_c": 0.008,
+    "normal_utilization_limit": 0.85,
+    "elevated_utilization_limit": 0.95,
+    "maintenance_utilization_limit": 0.55,
+    "maintenance_window": {
+      "start": "00:00",
+      "end": "06:00"
+    }
+  },
+  "bess": {
+    "power_mw": 20,
+    "energy_mwh": 40,
+    "min_soc_pct": 15,
+    "max_soc_pct": 95,
+    "initial_soc_pct": 50,
+    "round_trip_efficiency": 0.88,
+    "charge_window": {
+      "start": "10:00",
+      "end": "15:30"
+    },
+    "discharge_windows": [
+      {
+        "start": "18:30",
+        "end": "23:30"
+      }
+    ]
+  },
+  "ev_fleet": {
+    "bus_count": 500,
+    "charger_kw_per_bus": 180,
+    "target_energy_mwh": 65,
+    "charging_window": {
+      "start": "23:00",
+      "end": "06:00"
+    },
+    "valley_window": {
+      "start": "01:00",
+      "end": "05:30"
+    }
+  },
+  "demand_response": {
+    "enrolled_capacity_mw": 150,
+    "curtailable_fraction": 0.15,
+    "trigger_threshold_mw_by_target": {
+      "delhi_total_mw": 7800,
+      "ndmc_mw": 340
+    },
+    "lead_time_hours": 2,
+    "event_duration_hours": 2
+  }
+}

@@ -1,0 +1,12 @@
+**/__pycache__/
+**/.venv/
+**/node_modules/
+**/dist/
+.git/
+Web/Backend/data/
+ML/Data/Data/
+ML/Data/Extracted/
+ML/Data/Dataset/
+ML/Data/Reports/
+ML/Data/Processing/weather_cache/
+ML/Data/Processing/yearly_cleaned/

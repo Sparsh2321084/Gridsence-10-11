@@ -1,12 +1,19 @@
 # project files
-ML/Data/
-ML/Data/**
+ML/Data/*
+!ML/Data/Processing/
+ML/Data/Processing/*
+!ML/Data/Processing/*.py
 Pictures/
 
 # node / frontend build artifacts
 Web/Frontend/node_modules/
 Web/Frontend/dist/
 Web/Frontend/.vite/
+Web/Frontend/.env.*
+!Web/Frontend/.env.example
+Web/Backend/data/
+Web/Backend/.env
+ML/Model/*.joblib
 
 # general
 *.log
