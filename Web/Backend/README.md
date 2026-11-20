@@ -95,21 +95,27 @@ frontend still needs a production API URL or reverse proxy, and the deployed
 frontend origin must be added to `GRIDSENSE_CORS_ORIGINS`. Hosting, TLS,
 backups, and monitoring are deployment-specific.
 
-### Railway free-tier evaluation
+### Render Free deployment limitations
 
-Railway can build this Dockerfile from the repository root. For a demo, mount a
-volume at `/data`, place the model and dataset under `/data/artifacts/`, and set
-`GRIDSENSE_MODEL_PATH`, `GRIDSENSE_DATASET_PATH`,
-`GRIDSENSE_ACTUALS_DB_PATH`, and `GRIDSENSE_ABT_INBOX_PATH` to those mounted
-paths. Set `GRIDSENSE_CORS_ORIGINS` to the deployed frontend origin, and set
-`VITE_API_BASE_URL` in the frontend host to the Railway service's HTTPS origin.
+Render can build the `Web/Backend/Dockerfile` from the repository root, and the
+container uses Render's `PORT` environment variable. The Free web-service plan
+is suitable only for a demo: services spin down after 15 minutes without
+traffic, and their local files are lost on spin-down, restart, or redeploy.
+Free web services cannot attach persistent disks.
 
-The Railway Free plan is not suitable for dependable operations: it has a
-512-MB service memory limit, limited monthly usage credits, and a 500-MB volume
-limit. The current local actuals database is already about 336 MiB, before
-including the model and dataset if placed on the same volume. Monitor volume
-usage closely or use a paid/external persistent store before relying on the
-service.
+The Docker image intentionally does not include the model or enriched dataset,
+and Git ignores both artifacts. Until they are made available through an
+approved build-time or external download source, `/api/ready` will return
+`503`. The current local SQLite actuals database is about 336 MiB and is not
+included in the image; any SQLite database created by a Free service is
+ephemeral and cannot preserve actuals or predictions across restarts. The
+backend currently uses SQLite, so a separate persistent database would also
+require an implementation change.
+
+For a temporary demo, disable background polling with
+`GRIDSENSE_ENABLE_SLDC_POLLING=false`. For a persistent deployment, use a paid
+Render service with a disk or migrate storage to a durable database. No paid
+service or storage should be created without explicit cost approval.
 
 ## Data and operating limitations
 
