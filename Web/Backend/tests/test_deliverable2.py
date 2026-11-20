@@ -6,6 +6,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 from urllib.parse import parse_qs, urlparse
 
+import numpy as np
 import pandas as pd
 
 from Web.Backend.abt_import import ingest_abt_week, read_abt_week, scan_abt_folder
@@ -17,6 +18,7 @@ from Web.Backend.main import (
     fetch_open_meteo_weather,
 )
 from Web.Backend import main as forecast_api
+import predict_delhi_load as predictor
 
 
 EXOG_COLUMNS = [
@@ -65,6 +67,71 @@ def workbook_rows(timestamps: pd.DatetimeIndex) -> pd.DataFrame:
             "NORTHERN RAILWAY": 0.0025,
         }
     )
+
+
+class PredictionMemoryTests(unittest.TestCase):
+    def test_load_prediction_bundle_builds_and_keeps_one_model(self) -> None:
+        state_dict = {"weight": object()}
+        serialized_bundle = {"model_state_dict": state_dict}
+        model = MagicMock()
+        model_factory = MagicMock(return_value=model)
+        bundle_path = Path("model.joblib")
+
+        with (
+            patch.object(predictor.joblib, "load", return_value=serialized_bundle) as load,
+            patch.object(predictor, "MultiEntityITransformer", model_factory),
+        ):
+            bundle = predictor.load_prediction_bundle(bundle_path)
+
+        load.assert_called_once_with(bundle_path)
+        model_factory.assert_called_once_with()
+        model.load_state_dict.assert_called_once_with(state_dict)
+        model.eval.assert_called_once_with()
+        self.assertIs(bundle["model"], model)
+        self.assertNotIn("model_state_dict", bundle)
+
+    def test_forecast_uses_loaded_model_without_reloading_bundle(self) -> None:
+        targets = [
+            "brpl_mw",
+            "tpddl_mw",
+            "bypl_mw",
+            "ndmc_mw",
+            "mes_mw",
+            "railways_mw",
+            "delhi_total_mw",
+        ]
+        model = MagicMock(
+            return_value=predictor.torch.ones((1, 96, len(targets)), dtype=predictor.torch.float32)
+        )
+        scaler = MagicMock()
+        scaler.transform.side_effect = lambda values: values
+        bundle = {
+            "model": model,
+            "y_mean": np.zeros(len(targets)),
+            "y_std": np.ones(len(targets)),
+            "x_scaler": scaler,
+            "all_targets": targets,
+            "utilities": targets[:-1],
+            "aci_half_width_mw": {},
+        }
+        future = pd.date_range("2026-01-01", periods=96, freq="15min")
+
+        with patch.object(
+            predictor.joblib,
+            "load",
+            side_effect=AssertionError("Forecast must reuse the loaded bundle"),
+        ):
+            forecast = predictor.forecast_next_24h(
+                bundle,
+                np.zeros((672, len(targets))),
+                np.zeros((672, 29)),
+                np.zeros((96, 29)),
+                future,
+            )
+
+        model.assert_called_once()
+        self.assertEqual(forecast.shape, (96, len(targets)))
+        self.assertFalse(forecast.isna().any().any())
 
 
 class AbtImporterTests(unittest.TestCase):
@@ -469,7 +536,7 @@ class ForecastApiIntegrationTests(unittest.TestCase):
         captured: dict[str, object] = {}
 
         def fake_forecast(
-            _model_path: Path,
+            _bundle: dict[str, object],
             y_hist: object,
             x_hist: object,
             x_fut: object,
@@ -580,7 +647,7 @@ class ForecastApiIntegrationTests(unittest.TestCase):
         }
 
         def fake_forecast(
-            _model_path: Path,
+            _bundle: dict[str, object],
             _y_hist: object,
             _x_hist: object,
             _x_fut: object,

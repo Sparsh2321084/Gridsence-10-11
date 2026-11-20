@@ -1,3 +1,6 @@
+from pathlib import Path
+from typing import Any
+
 import joblib
 import numpy as np
 import pandas as pd
@@ -26,11 +29,25 @@ class MultiEntityITransformer(nn.Module):
         encoded  = self.encoder(tokens)
         return self.proj_head(encoded[:, :self.n_targets, :]).transpose(1, 2)
 
-def forecast_next_24h(bundle_path, y_hist_672x7, x_hist_672x29, x_fut_96x29, future_timestamps, recent_14d_block_bias=None):
-    bundle = joblib.load(bundle_path)
+def load_prediction_bundle(bundle_path: str | Path) -> dict[str, Any]:
+    bundle: dict[str, Any] = joblib.load(bundle_path)
+    state_dict = bundle.pop("model_state_dict")
     model = MultiEntityITransformer()
-    model.load_state_dict(bundle["model_state_dict"])
+    model.load_state_dict(state_dict)
     model.eval()
+    bundle["model"] = model
+    return bundle
+
+
+def forecast_next_24h(
+    bundle: dict[str, Any],
+    y_hist_672x7: np.ndarray,
+    x_hist_672x29: np.ndarray,
+    x_fut_96x29: np.ndarray,
+    future_timestamps: pd.DatetimeIndex,
+    recent_14d_block_bias: pd.DataFrame | None = None,
+) -> pd.DataFrame:
+    model: MultiEntityITransformer = bundle["model"]
 
     yh = (y_hist_672x7 - bundle["y_mean"]) / bundle["y_std"]
     xh = bundle["x_scaler"].transform(x_hist_672x29)

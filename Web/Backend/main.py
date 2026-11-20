@@ -33,7 +33,7 @@ from Web.Backend.domain.grid_metrics import (
 from Web.Backend.integrations.abt_import import scan_abt_folder
 from Web.Backend.integrations.sldc_source import fetch_sldc_snapshot
 from Web.Backend.storage.actuals_store import ActualLoadStore, InferenceHistoryError
-from predict_delhi_load import forecast_next_24h
+from predict_delhi_load import forecast_next_24h, load_prediction_bundle
 from enrich_delhi_dataset import add_domain_features
 
 
@@ -219,10 +219,8 @@ app.add_middleware(
 
 
 @lru_cache(maxsize=1)
-def load_bundle():
-    import joblib
-
-    return joblib.load(MODEL_PATH)
+def load_bundle() -> dict[str, Any]:
+    return load_prediction_bundle(MODEL_PATH)
 
 
 @lru_cache(maxsize=1)
@@ -494,7 +492,7 @@ def _build_forecast(
 
     recent_bias = actuals_store.recent_14d_block_bias(future, now=now)
     forecast = forecast_next_24h(
-        MODEL_PATH,
+        bundle,
         y_hist,
         x_hist,
         x_fut,
