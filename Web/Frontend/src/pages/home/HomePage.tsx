@@ -1,19 +1,31 @@
-import { AboutSection } from './sections/AboutSection'
-import { CallToActionSection } from './sections/CallToActionSection'
 import { HeroSection } from './sections/HeroSection'
-import { MetricsSection } from './sections/MetricsSection'
+import { AboutSection } from './sections/AboutSection'
+import { ChallengesAndStakesSection } from './sections/ChallengesAndStakesSection'
+import { DataFoundationSection } from './sections/DataFoundationSection'
 import { ProcessSection } from './sections/ProcessSection'
-import { WhyForecastingSection } from './sections/WhyForecastingSection'
+import { ResearchAchievementsSection } from './sections/ResearchAchievementsSection'
+import { DecisionSupportSection } from './sections/DecisionSupportSection'
+import { FutureDirectionsSection } from './sections/FutureDirectionsSection'
+import { GridExplorerPromoSection } from './sections/GridExplorerPromoSection'
 
 export function HomePage() {
   return (
-    <main>
+    <div className="home-glass-canvas">
+      <div className="ambient-orb ambient-orb--one" aria-hidden="true" />
+      <div className="ambient-orb ambient-orb--two" aria-hidden="true" />
+      <div className="ambient-orb ambient-orb--three" aria-hidden="true" />
+
       <HeroSection />
-      <MetricsSection />
       <AboutSection />
-      <WhyForecastingSection />
+      <ChallengesAndStakesSection />
+      <DataFoundationSection />
       <ProcessSection />
-      <CallToActionSection />
-    </main>
+      <ResearchAchievementsSection />
+      <DecisionSupportSection />
+      <FutureDirectionsSection />
+      <GridExplorerPromoSection />
+    </div>
   )
 }
+
+export default HomePage

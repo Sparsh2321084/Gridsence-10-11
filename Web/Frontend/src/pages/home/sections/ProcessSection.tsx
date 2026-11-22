@@ -1,28 +1,52 @@
-import { Activity, ArrowRight, BarChart3, Cpu, Database } from 'lucide-react'
+import { Cpu, Database, GitMerge, ShieldCheck } from 'lucide-react'
 
-const processSteps = [
-  { title: <>Collect<br />live data</>, icon: Database },
-  { title: <>Apply machine<br />learning models</>, icon: Cpu },
-  { title: <>Forecast<br />electricity demand</>, icon: BarChart3 },
-  { title: <>Visualize<br />grid insights</>, icon: Activity },
+const steps = [
+  {
+    step: '01',
+    title: 'Audit-Gated Lookback',
+    detail: 'Assembles 672 trailing 15-min load blocks (7 days) plus 29 weather & calendar covariates.',
+    icon: Database,
+  },
+  {
+    step: '02',
+    title: 'Multi-Entity iTransformer',
+    detail: 'Applies variable-axis self-attention across 36 tokens to learn cross-utility coupling.',
+    icon: Cpu,
+  },
+  {
+    step: '03',
+    title: 'MinT + Causal Calibration',
+    detail: 'Reconciles physical MW sums via MinT and removes secular bias with a 14-day rolling corrector.',
+    icon: GitMerge,
+  },
+  {
+    step: '04',
+    title: 'Adaptive Conformal Bounds',
+    detail: 'Outputs calibrated P05–P50–P95 intervals every 15 minutes for reserve and market sizing.',
+    icon: ShieldCheck,
+  },
 ]
 
 export function ProcessSection() {
   return (
-    <section className="process-section page-width" id="how-it-works" aria-labelledby="process-title">
-      <p className="section-kicker">From raw signals to useful insight</p>
-      <h2 id="process-title">How GridSense Works</h2>
-      <p className="process-intro">From data to insights in a few simple steps.</p>
+    <section className="home-section page-width" id="how-it-works" aria-labelledby="process-title">
+      <div className="section-header-compact">
+        <p className="section-kicker">04 · System Architecture</p>
+        <h2 id="process-title">How GridSense Works</h2>
+      </div>
 
-      <div className="process-steps">
-        {processSteps.map(({ title, icon: Icon }, index) => (
-          <div className="process-step" key={index}>
-            <span className="process-icon"><Icon aria-hidden="true" /></span>
-            <p>{title}</p>
-            {index < processSteps.length - 1 && (
-              <ArrowRight className="step-arrow" aria-hidden="true" />
-            )}
-          </div>
+      <div className="bento-4-grid">
+        {steps.map(({ step, title, detail, icon: Icon }) => (
+          <article className="glass-card glass-card--light process-glass-card" key={step}>
+            <div className="process-glass-head">
+              <span className="step-pill">{step}</span>
+              <span className="tile-icon">
+                <Icon aria-hidden="true" />
+              </span>
+            </div>
+            <h3>{title}</h3>
+            <p>{detail}</p>
+          </article>
         ))}
       </div>
     </section>
