@@ -1,100 +1,173 @@
-import { ArrowLeft, Compass, Layers, MapPin, Sparkles } from 'lucide-react'
-
-const DELHI_ZONES = [
-  {
-    code: 'BRPL',
-    name: 'BSES Rajdhani Power Ltd',
-    region: 'South & West Delhi',
-    share: '~41%',
-    driver: 'Late-night residential cooling & commercial corridors',
-  },
-  {
-    code: 'TPDDL',
-    name: 'Tata Power Delhi Distribution',
-    region: 'North & North-West Delhi',
-    share: '~31%',
-    driver: 'Industrial feeders, residential colonies & rooftop solar',
-  },
-  {
-    code: 'BYPL',
-    name: 'BSES Yamuna Power Ltd',
-    region: 'East & Central Delhi',
-    share: '~22%',
-    driver: 'High-density urban residential & evening AC surge',
-  },
-  {
-    code: 'NDMC',
-    name: 'New Delhi Municipal Council',
-    region: 'Lutyens & Central Diplomatic Zone',
-    share: '~4.5%',
-    driver: 'Afternoon office HVAC peak (14:45–15:15 IST)',
-  },
-  {
-    code: 'MES',
-    name: 'Military Engineer Services',
-    region: 'Delhi Cantonment',
-    share: '~0.7%',
-    driver: 'Institutional & defense base load schedule',
-  },
-  {
-    code: 'Railways',
-    name: 'Northern Railway Traction',
-    region: 'Delhi Suburban & Trunk Rail Corridors',
-    share: '~0.3%',
-    driver: 'Timetable-driven electric traction drawal',
-  },
-]
+import { useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { Clock3, MapPin, RefreshCw, Search, Zap } from 'lucide-react'
+import { apiUrl } from '../../lib/api'
+import { DelhiGridMap } from './DelhiGridMap'
+import { DELHI_GRID_REGIONS, type UtilitySeriesKey } from './delhiGridTopology'
 
 export function GridExplorerPage() {
+  const [selectedId, setSelectedId] = useState<UtilitySeriesKey>('brpl_mw')
+  const [latestRow, setLatestRow] = useState<Record<string, unknown> | null>(null)
+  const [query, setQuery] = useState('')
+  const [showSubstations, setShowSubstations] = useState(true)
+  const [showCorridors, setShowCorridors] = useState(true)
+  const [showLandmarks, setShowLandmarks] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+
+  const loadForecast = (signal?: AbortSignal) => {
+    setRefreshing(true)
+    return fetch(apiUrl('/api/forecast'), signal ? { signal } : undefined)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && Array.isArray(data.forecast) && data.forecast.length > 0) {
+          setLatestRow(data.forecast[0])
+        }
+      })
+      .catch(() => {})
+      .finally(() => setRefreshing(false))
+  }
+
+  useEffect(() => {
+    const controller = new AbortController()
+    void loadForecast(controller.signal)
+    return () => controller.abort()
+  }, [])
+
+  const activeRegion = useMemo(
+    () => DELHI_GRID_REGIONS.find((r) => r.id === selectedId) ?? DELHI_GRID_REGIONS[0],
+    [selectedId],
+  )
+
+  const liveMw = latestRow?.[activeRegion.id]
+  const filteredRegions = useMemo(() => {
+    const normalized = query.trim().toLowerCase()
+    if (!normalized) return DELHI_GRID_REGIONS
+    return DELHI_GRID_REGIONS.filter((region) =>
+      `${region.code} ${region.name} ${region.zoneLabel}`.toLowerCase().includes(normalized),
+    )
+  }, [query])
+
   return (
-    <div className="home-glass-canvas explorer-placeholder-page">
-      <div className="ambient-orb ambient-orb--one" aria-hidden="true" />
-      <div className="ambient-orb ambient-orb--two" aria-hidden="true" />
-
+    <main className="grid-explorer-page">
       <div className="page-width">
-        <div className="glass-card glass-card--dark explorer-placeholder-card">
-          <div className="glass-pill glass-pill--dark">
-            <Compass aria-hidden="true" /> Interactive Spatial Topology · Coming Next
+        <header className="grid-explorer-heading">
+          <div>
+            <p className="section-kicker">National Capital Territory</p>
+            <h1>Delhi Grid Explorer</h1>
+            <p>Explore distribution zones, substations and live forecast load across the capital.</p>
+          </div>
+          <button
+            className="grid-refresh-button"
+            type="button"
+            onClick={() => void loadForecast()}
+            disabled={refreshing}
+          >
+            <RefreshCw className={refreshing ? 'grid-spinner' : ''} aria-hidden="true" />
+            Refresh forecast
+          </button>
+        </header>
+
+        <section className="grid-explorer-shell">
+          <aside className="grid-explorer-sidebar">
+            <label className="grid-region-search">
+              <Search aria-hidden="true" />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search Delhi zone"
+                aria-label="Search Delhi zone"
+              />
+            </label>
+
+            <div className="grid-region-list">
+              {filteredRegions.map((region) => (
+                <button
+                  key={region.id}
+                  type="button"
+                  className={`grid-region-item ${selectedId === region.id ? 'is-active' : ''}`}
+                  onClick={() => setSelectedId(region.id)}
+                >
+                  <span className="grid-region-dot" style={{ background: region.accent }} />
+                  <span>
+                    <strong>{region.code}</strong>
+                    <small>{region.zoneLabel}</small>
+                  </span>
+                  <b>{region.sharePct}</b>
+                </button>
+              ))}
+              {filteredRegions.length === 0 && (
+                <p className="grid-region-empty">No matching zones</p>
+              )}
+            </div>
+
+            <div className="grid-layer-controls">
+              <p>Map layers</p>
+              <button type="button" className={showSubstations ? 'is-on' : ''} onClick={() => setShowSubstations((value) => !value)}>
+                Substations
+              </button>
+              <button type="button" className={showCorridors ? 'is-on' : ''} onClick={() => setShowCorridors((value) => !value)}>
+                Corridors
+              </button>
+              <button type="button" className={showLandmarks ? 'is-on' : ''} onClick={() => setShowLandmarks((value) => !value)}>
+                Landmarks
+              </button>
+            </div>
+          </aside>
+
+          <div className="grid-map-panel">
+            <DelhiGridMap
+              selectedRegionId={selectedId}
+              onSelectRegion={setSelectedId}
+              latestForecastRow={latestRow}
+              showSubstations={showSubstations}
+              showCorridors={showCorridors}
+              showLandmarks={showLandmarks}
+            />
           </div>
 
-          <h1>
-            Delhi <span>Grid Explorer</span>
-          </h1>
+          <aside className="grid-detail-panel" style={{ '--region-accent': activeRegion.accent } as CSSProperties}>
+            <div className="grid-detail-status">
+              <span style={{ background: activeRegion.accent }} />
+              Active zone
+            </div>
+            <p className="grid-detail-code">{activeRegion.code}</p>
+            <h2>{activeRegion.name}</h2>
+            <p className="grid-detail-zone"><MapPin aria-hidden="true" /> {activeRegion.zoneLabel}</p>
 
-          <p>
-            Interactive 3D spatial map of Delhi&apos;s six unbundled distribution utilities,
-            coincident peak clocks, and 220 kV / 400 kV transmission corridors—reconciled into
-            Delhi SLDC&apos;s citywide total.
-          </p>
-
-          <div className="explorer-zone-grid" style={{ marginBottom: 24 }}>
-            {DELHI_ZONES.map((zone) => (
-              <div className="glass-subcard glass-subcard--dark explorer-zone-pill" key={zone.code}>
-                <div className="zone-pill-top">
-                  <MapPin aria-hidden="true" />
-                  <strong>{zone.code}</strong>
-                  <span>{zone.share}</span>
-                </div>
-                <small>{zone.region}</small>
-                <p style={{ marginTop: 4 }}>{zone.driver}</p>
+            <div className="grid-live-metric">
+              <div>
+                <small><Zap aria-hidden="true" /> Forecast load</small>
+                <strong>{typeof liveMw === 'number' ? liveMw.toFixed(1) : '—'} MW</strong>
               </div>
-            ))}
-          </div>
+              <span>{activeRegion.sharePct} share</span>
+            </div>
 
-          <div className="explorer-placeholder-actions">
-            <a className="button button--primary" href="/dashboard">
-              <Sparkles aria-hidden="true" /> Open Live Forecast Dashboard
-            </a>
-            <a className="button button--glass-dark" href="/">
-              <ArrowLeft aria-hidden="true" /> Back to Home
-            </a>
-            <span className="glass-pill glass-pill--dark" style={{ marginLeft: 'auto' }}>
-              <Layers aria-hidden="true" /> 7 MinT-Reconciled Entities
-            </span>
-          </div>
-        </div>
+            <dl className="grid-detail-facts">
+              <div>
+                <dt>Archetype</dt>
+                <dd>{activeRegion.archetype}</dd>
+              </div>
+              <div>
+                <dt><Clock3 aria-hidden="true" /> Peak window</dt>
+                <dd>{activeRegion.peakWindow}</dd>
+              </div>
+            </dl>
+
+            <div className="grid-substation-list">
+              <h3>Key substations</h3>
+              {activeRegion.innerSubstations.slice(0, 4).map((sub) => (
+                <div key={sub.id}>
+                  <span />
+                  <p>
+                    <strong>{sub.name}</strong>
+                    <small>{sub.voltage}</small>
+                  </p>
+                </div>
+              ))}
+            </div>
+          </aside>
+        </section>
       </div>
-    </div>
+    </main>
   )
 }
 
